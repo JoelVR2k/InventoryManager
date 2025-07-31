@@ -1,30 +1,42 @@
+// Product.java
 package com.breakabletoy1.InventoryManager.model;
 
-import java.time.LocalDate; 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType; 
+import jakarta.persistence.Id;
 
+import java.time.LocalDate;
+
+@Entity
 public class Product {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    private Integer id; 
+
     private String name;
     private String category;
     private double unitPrice;
-    private LocalDate expirationDate; 
+    private LocalDate expirationDate;
     private int quantityInStock;
 
-    public Product(int id, String name, String category, double unitPrice, LocalDate expirationDate, int quantityInStock) {
+    public Product() {
+    }
+
+    public Product(Integer id, String name, String category, double unitPrice, LocalDate expirationDate, int quantityInStock) {
         this.id = id;
         this.name = name;
-        this.category = category;
         this.unitPrice = unitPrice;
+        this.category = category;
         this.expirationDate = expirationDate;
         this.quantityInStock = quantityInStock;
     }
-
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
