@@ -66,6 +66,7 @@ Open a new terminal window and navigate to the frontend directory.
 The application will be available at http://localhost:8080.
 
 cd frontend
+
 npm start
 
 📝 Environment Variables
