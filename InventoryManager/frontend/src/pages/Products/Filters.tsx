@@ -1,4 +1,5 @@
-import React, { Dispatch, SetStateAction, useState, useEffect } from 'react'; // Importa useState y useEffect
+import React, { Dispatch, SetStateAction, useState, useEffect } from 'react';
+import { FunnelIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'; // Using Heroicons for a professional look
 
 interface FiltersProps {
   filters: {
@@ -10,61 +11,74 @@ interface FiltersProps {
 }
 
 const Filters = ({ filters, setFilters }: FiltersProps) => {
-  const [localNameSearchTerm, setLocalNameSearchTerm] = useState(filters.name);
+  // Local state for the search input to implement debouncing
+  const [searchTerm, setSearchTerm] = useState(filters.name);
 
+  // Debounce effect: update the parent filter state only when the user stops typing
   useEffect(() => {
-    setLocalNameSearchTerm(filters.name);
-  }, [filters.name]);
+    const delayDebounceFn = setTimeout(() => {
+      setFilters((prev: any) => ({ ...prev, name: searchTerm }));
+    }, 300); // 300ms delay
 
-  const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalNameSearchTerm(e.target.value);
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, setFilters]);
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setFilters({ name: '', category: '', available: 'all' });
   };
 
-  const handleSearchClick = () => {
-    setFilters((prev: any) => ({ ...prev, name: localNameSearchTerm }));
-  };
+  const hasActiveFilters = filters.category || filters.available !== 'all' || searchTerm;
 
   return (
-    <div className="flex flex-wrap gap-4 items-center"> {}
-      <input
-        type="text"
-        placeholder="Filter by name"
-        className="border p-2 rounded"
-        value={localNameSearchTerm} 
-        onChange={handleNameInputChange} 
-        onKeyDown={(e) => { 
-          if (e.key === 'Enter') {
-            handleSearchClick();
-          }
-        }}
-      />
-      {}
-      <button
-        onClick={handleSearchClick}
-        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Search
-      </button>
+    <div className="flex flex-col md:flex-row gap-4 items-center">
+      {/* Live Search Input */}
+      <div className="relative w-full md:flex-grow">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+        </div>
+        <input
+          type="text"
+          placeholder="Filter by name..."
+          className="w-full border border-gray-300 rounded-md p-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
+      {/* Category Filter */}
       <select
-        className="border p-2 rounded"
+        className="w-full md:w-auto border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
         value={filters.category}
         onChange={(e) => setFilters((prev: any) => ({ ...prev, category: e.target.value }))}
       >
-        <option value="">Select category</option>
+        <option value="">All Categories</option>
         <option value="electronics">Electronics</option>
         <option value="clothing">Clothing</option>
         <option value="food">Food</option>
       </select>
+      
+      {/* Stock Status Filter */}
       <select
-        className="border p-2 rounded"
+        className="w-full md:w-auto border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
         value={filters.available}
         onChange={(e) => setFilters((prev: any) => ({ ...prev, available: e.target.value }))}
       >
-        <option value="all">All</option>
+        <option value="all">All Stock</option>
         <option value="in">In Stock</option>
         <option value="out">Out of Stock</option>
       </select>
+
+      {/* Clear Filters Button */}
+      {hasActiveFilters && (
+        <button
+          onClick={handleClearFilters}
+          className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 transition"
+        >
+          <XMarkIcon className="h-4 w-4" />
+          Clear Filters
+        </button>
+      )}
     </div>
   );
 };

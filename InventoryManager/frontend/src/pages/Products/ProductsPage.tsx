@@ -94,28 +94,40 @@ const ProductsPage = () => {
     }
   };
 
-  const enhancedProducts = data?.content.map(product => ({
-    ...product,
-    rowClass: getExpirationClass(product.expirationDate, product.category),
-    stockClass:
-      product.quantityInStock < 5
-        ? 'text-red-600'
-        : product.quantityInStock <= 10
-        ? 'text-orange-500'
-        : '',
-    strike: product.quantityInStock === 0 ? 'line-through' : '',
-  })) || [];
+  const enhancedProducts = data?.content.map(product => {
+    let stockClass = '';
+    if (product.quantityInStock === 0) {
+      stockClass = 'bg-gray-100 text-gray-800';
+    } else if (product.quantityInStock <= 10) {
+      stockClass = 'bg-orange-100 text-orange-800';
+    } else {
+      stockClass = 'bg-green-100 text-green-800';
+    }
+    
+    return {
+      ...product,
+      // Apply opacity and strikethrough for out-of-stock items
+      rowClass: product.quantityInStock === 0 ? 'opacity-60' : '',
+      strike: product.quantityInStock === 0 ? 'line-through' : '',
+      stockClass,
+    };
+  }) || [];
 
-  if (isLoading || !data) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (!data) return <div>No data available.</div>;
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Inventory Management</h1>
-        <Link to="/create" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+    <div className="p-4 md:p-6 space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
+          <p className="text-sm text-gray-600 mt-1">Manage, track, and analyze your product inventory.</p>
+        </div>
+        <Link to="/create" className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition">
           + Add Product
         </Link>
       </div>
+      
       <Filters filters={filters} setFilters={setFilters} />
       
       <ProductTable
@@ -126,11 +138,18 @@ const ProductsPage = () => {
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={data.totalPages}
-        onPageChange={setCurrentPage}
-      />
+      
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <p className="text-sm text-gray-700">
+          Showing <span className="font-medium">{data.content.length}</span> of <span className="font-medium">{data.totalElements}</span> results
+        </p>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={data.totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
+
       <Metrics products={allProducts} />
     </div>
   );
